@@ -1,0 +1,11 @@
+<% if (page.sectionBadge) { -%>
+<div class="hexo-meta-banner">
+  <strong><%= page.sectionBadge %></strong>
+  <% if (page.sectionContext) { -%>
+  <span>· <%= page.sectionContext %></span>
+  <% } -%>
+</div>
+<% } -%>
+<article class="doc-article">
+  <%- page.content %>
+</article>

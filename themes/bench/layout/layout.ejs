@@ -1,0 +1,160 @@
+<%
+  const bench = (site.data && site.data.bench) || {};
+  const currentCleanUrl = normalize_page_url(page.path);
+  const isHome = currentCleanUrl === '/';
+  const rawHtml = page.content || body || '';
+  const hasMermaid = rawHtml.includes('class="mermaid"');
+  const tocItems = isHome ? [] : extract_doc_toc(rawHtml);
+  const navRoots = build_doc_nav();
+
+  function renderNavEntries(entries) {
+    let out = '';
+    for (const entry of entries) {
+      const isActive = entry.rawUrl === currentCleanUrl;
+      out += '<li>';
+      out += `<a class="nav-link${isActive ? ' active' : ''}" href="${entry.url}">${entry.title}</a>`;
+      if (entry.children && entry.children.length > 0) {
+        if (entry.groupLabel) {
+          out += `<div class="nav-subgroup-label">${entry.groupLabel}</div>`;
+        }
+        out += '<ul class="nav-sublist">';
+        out += renderNavEntries(entry.children);
+        out += '</ul>';
+      }
+      out += '</li>';
+    }
+    return out;
+  }
+-%>
+<!doctype html>
+<html lang="<%= config.language || 'zh-CN' %>" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= isHome ? config.title : (page.title + ' · ' + config.title) %></title>
+    <% if (page.description || config.description) { -%>
+    <meta name="description" content="<%= page.description || config.description %>" />
+    <% } -%>
+    <link rel="stylesheet" href="<%- url_for('/vendor/katex.min.css') %>" />
+    <link rel="stylesheet" href="<%- url_for('/css/style.css') %>" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="<%- url_for('/') %>">
+        <span><%= config.title %></span>
+        <span class="version-pill">v<%= bench.version || '8.1.2' %> · CJS</span>
+        <% if (!hasMermaid) { -%>
+        <span class="zero-js-pill" title="当前页面构建产物含 0 个 script 标签">0 KB Client JS</span>
+        <% } -%>
+      </a>
+      <div class="topbar-actions">
+        <a href="<%= bench.portal || 'https://page.2401.xyz/' %>" target="_top">对比总站</a>
+        <a href="<%= bench.repo || 'https://github.com/page2401/hexo' %>" target="_blank" rel="noopener">GitHub</a>
+        <button
+          class="theme-btn"
+          id="hexo-theme-toggle"
+          type="button"
+          onclick="var r=document.documentElement,d=!(r.getAttribute('data-theme')==='dark'||r.classList.contains('dark'));r.classList.toggle('dark',d);r.setAttribute('data-theme',d?'dark':'light');try{localStorage.setItem('hexo-benchmark-theme',d?'dark':'light')}catch(e){}if(window.__renderHexoMermaid){window.__renderHexoMermaid();}"
+        >
+          <span class="theme-label-dark">深色模式</span>
+          <span class="theme-label-light">浅色模式</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidebar" aria-label="文档章节导航">
+        <div class="nav-group-label"><%= bench.navHeading || '基准章节 (Warehouse Pages)' %></div>
+        <ul class="nav-list">
+          <%- renderNavEntries(navRoots) %>
+        </ul>
+      </aside>
+
+      <main class="main-content">
+        <%- body %>
+      </main>
+
+      <aside class="toc-aside">
+        <% if (!isHome && tocItems.length > 0) { -%>
+        <div class="toc-title">本页目录</div>
+        <nav aria-label="本页目录">
+          <ul class="toc-list">
+            <% for (const item of tocItems) { -%>
+            <li class="toc-h<%= item.level %>">
+              <a href="#<%= item.id %>"><%= item.text %></a>
+            </li>
+            <% } -%>
+          </ul>
+        </nav>
+        <% } -%>
+      </aside>
+    </div>
+
+    <% if (hasMermaid) { -%>
+    <script src="<%- url_for('/vendor/mermaid.min.js') %>"></script>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('hexo-benchmark-theme');
+          var root = document.documentElement;
+          if (saved === 'dark' && root.getAttribute('data-theme') !== 'dark') {
+            root.classList.add('dark');
+            root.setAttribute('data-theme', 'dark');
+          }
+        } catch (_) {}
+
+        async function renderAllMermaid() {
+          if (!window.mermaid) return;
+          var wraps = document.querySelectorAll('.hexo-mermaid-wrap');
+          if (!wraps.length) return;
+          var isDark =
+            document.documentElement.getAttribute('data-theme') === 'dark' ||
+            document.documentElement.classList.contains('dark');
+          window.mermaid.initialize({
+            startOnLoad: false,
+            theme: isDark ? 'dark' : 'default',
+            securityLevel: 'loose'
+          });
+          var idx = 0;
+          for (var i = 0; i < wraps.length; i++) {
+            var wrap = wraps[i];
+            if (!wrap.dataset.mermaidSrc) {
+              var pre = wrap.querySelector('pre.mermaid');
+              wrap.dataset.mermaidSrc = pre ? pre.textContent || '' : '';
+            }
+            var src = wrap.dataset.mermaidSrc;
+            if (!src.trim()) continue;
+            try {
+              var id = 'hexo-mermaid-' + Date.now() + '-' + idx++;
+              var out = await window.mermaid.render(id, src);
+              wrap.innerHTML = out.svg;
+            } catch (err) {
+              console.error('Mermaid render failed:', err);
+            }
+          }
+        }
+
+        window.__renderHexoMermaid = renderAllMermaid;
+        void renderAllMermaid();
+
+        var lastDark =
+          document.documentElement.getAttribute('data-theme') === 'dark' ||
+          document.documentElement.classList.contains('dark');
+        new MutationObserver(function () {
+          var nowDark =
+            document.documentElement.getAttribute('data-theme') === 'dark' ||
+            document.documentElement.classList.contains('dark');
+          if (nowDark !== lastDark) {
+            lastDark = nowDark;
+            document.documentElement.classList.toggle('dark', nowDark);
+            void renderAllMermaid();
+          }
+        }).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['data-theme', 'class']
+        });
+      })();
+    </script>
+    <% } -%>
+  </body>
+</html>

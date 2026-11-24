@@ -1,0 +1,5 @@
+portal: "https://page.2401.xyz/"
+repo: "https://github.com/page2401/hexo"
+version: "8.1.2"
+navHeading: "基准章节 (Warehouse Pages)"
+nestedLabel: "nested · 多级嵌套子页"
