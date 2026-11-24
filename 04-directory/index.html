@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>04. 目录结构与路由取舍 · Hexo 基准文档站</title>
+        <meta name="description" content="实测 Hexo 博客基因下的 _posts 与独立 Page 双轨路由机制、&lt;slug&gt;/index.md 干净目录约定与 Warehouse 动态侧栏。" />
+        <link rel="stylesheet" href="/hexo/vendor/katex.min.css" />
+    <link rel="stylesheet" href="/hexo/css/style.css" />
+  <meta name="generator" content="Hexo 8.1.2"></head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/hexo/">
+        <span>Hexo 基准文档站</span>
+        <span class="version-pill">v8.1.2 · CJS</span>
+                <span class="zero-js-pill" title="当前页面构建产物含 0 个 script 标签">0 KB Client JS</span>
+              </a>
+      <div class="topbar-actions">
+        <a href="https://page.2401.xyz/" target="_top">对比总站</a>
+        <a href="https://github.com/page2401/hexo" target="_blank" rel="noopener">GitHub</a>
+        <button
+          class="theme-btn"
+          id="hexo-theme-toggle"
+          type="button"
+          onclick="var r=document.documentElement,d=!(r.getAttribute('data-theme')==='dark'||r.classList.contains('dark'));r.classList.toggle('dark',d);r.setAttribute('data-theme',d?'dark':'light');try{localStorage.setItem('hexo-benchmark-theme',d?'dark':'light')}catch(e){}if(window.__renderHexoMermaid){window.__renderHexoMermaid();}"
+        >
+          <span class="theme-label-dark">深色模式</span>
+          <span class="theme-label-light">浅色模式</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidebar" aria-label="文档章节导航">
+        <div class="nav-group-label">基准章节 (Warehouse Pages)</div>
+        <ul class="nav-list">
+          <li><a class="nav-link" href="/hexo/">00. 概览与版本档案</a></li><li><a class="nav-link" href="/hexo/01-annotations/">01. 专属标注与元数据</a></li><li><a class="nav-link" href="/hexo/02-diagrams/">02. 流程图与时序图</a></li><li><a class="nav-link" href="/hexo/03-math/">03. 数学公式排版</a></li><li><a class="nav-link active" href="/hexo/04-directory/">04. 目录结构与路由取舍</a><div class="nav-subgroup-label">nested · 多级嵌套子页</div><ul class="nav-sublist"><li><a class="nav-link" href="/hexo/04-directory/nested/01-order-and-url/">嵌套子页 A：排序前缀与 URL 纯净度权衡</a></li><li><a class="nav-link" href="/hexo/04-directory/nested/02-sidebar-sync/">嵌套子页 B：多级子目录与侧边栏同步机制</a></li></ul></li><li><a class="nav-link" href="/hexo/05-code-blocks/">05. 高阶代码块与语法高亮</a></li>
+        </ul>
+      </aside>
+
+      <main class="main-content">
+        <div class="hexo-meta-banner">
+  <strong>Hexo Page Directory</strong>
+    <span>· source/04-directory/index.md → Warehouse site.pages</span>
+  </div>
+<article class="doc-article">
+  <h1 id="04-目录结构与路由取舍（Post-Page-双轨制与目录化约定）">04. 目录结构与路由取舍（Post &#x2F; Page 双轨制与目录化约定）</h1>
+<p>将标准 GFM 母版 <code>docs/04-directory/</code> 迁移至 <strong>Hexo (<code>hexo@8.1.2</code>)</strong> 时，清晰暴露出“博客引擎改造成多级知识库文档站”时的核心架构特征与取舍：</p>
+<aside class="hexo-note is-info">
+  <div class="hexo-note-title">Hexo 路由与目录三大核心实测发现</div>
+  <div class="hexo-note-body">
+<ol>
+<li><strong>博客基因导致的 <code>_posts</code> vs <code>Page</code> 双轨制</strong>：<code>_config.yml</code> 中的全局 <code>permalink: :year/:month/:day/:title/</code> <strong>仅对 <code>source/_posts/</code> 下的博文生效</strong>！对于放置在 <code>source/</code> 下的独立文档页（<code>Page</code> 模型），若直接放 <code>source/01-annotations.md</code>，Hexo <code>assetProcessor</code> 会固定输出 <code>public/01-annotations.html</code>。</li>
+<li><strong><code>pretty_urls.trailing_html: false</code> 的隐蔽陷阱</strong>：Hexo 配置中的 <code>pretty_urls</code> 仅裁剪 <code>url_for()</code> 生成的超链接后缀，<strong>并不会改变磁盘上生成的 <code>.html</code> 文件路径</strong>——若在纯静态文件服务器上盲目关闭 <code>trailing_html</code>，会导致无后缀链接集体 404！因此 Hexo 官方 <code>hexo new page &lt;slug&gt;</code> 确立了将每篇独立页展开为 <code>&lt;slug&gt;/index.md</code> 目录（如 <code>source/01-annotations/index.md</code> → <code>public/01-annotations/index.html</code>）的干净 URL 范式。</li>
+<li><strong><code>source_dir: source</code> 天然隔离 + <code>Warehouse</code> 动态聚合侧边栏</strong>：仓库根目录 <code>README.md</code> 被干净隔离在 <code>source/</code> 之外；由于 Hexo <code>Page</code> 模型不像博文那样拥有 <code>Categories</code>，本子站通过自定义 Helper 直接查询 <code>site.pages</code>（<code>warehouse@6</code> 内存表），按 <code>order</code> 与 <code>parent</code> 字段自动构建多级树，并在 <code>after_post_render</code> 中将离线 <code>.md</code> 相对链接自动重写为线上路由。</li>
+</ol>
+  </div>
+</aside>
+
+
+<h2 id="母版与-Hexo-目录派生对比">母版与 Hexo 目录派生对比</h2>
+<ol>
+<li><strong><code>source/</code> 内容根隔离</strong>：工程根目录下的 <code>_config.yml</code>、<code>scripts/</code>、<code>themes/</code> 与 <code>README.md</code> 均不会混入 <code>source/</code> 编译流。</li>
+<li><strong>目录化单页结构</strong>：单文件章节如 <code>docs/04-directory/nested/01-order-and-url.md</code> 派生为 <code>source/04-directory/nested/01-order-and-url/index.md</code>，确保静态产物天然落盘为 <code>index.html</code> 干净目录路由。</li>
+<li><strong>保留离线可点击 <code>.md</code> 相对路径</strong>：源码内继续使用 <code>./nested/01-order-and-url/index.md</code> 相对链接，GitHub 网页端与本地编辑器点击直达，构建期自动重写为 <code>/hexo/04-directory/nested/01-order-and-url/</code>。</li>
+</ol>
+<h2 id="嵌套子文档入口">嵌套子文档入口</h2>
+<ul>
+<li><a href="/hexo/04-directory/nested/01-order-and-url/">进入子文档 A：排序前缀与 URL 纯净度权衡</a></li>
+<li><a href="/hexo/04-directory/nested/02-sidebar-sync/">进入子文档 B：多级子目录与侧边栏同步机制</a></li>
+</ul>
+
+</article>
+
+      </main>
+
+      <aside class="toc-aside">
+                <div class="toc-title">本页目录</div>
+        <nav aria-label="本页目录">
+          <ul class="toc-list">
+                        <li class="toc-h2">
+              <a href="#母版与-Hexo-目录派生对比">母版与 Hexo 目录派生对比</a>
+            </li>
+                        <li class="toc-h2">
+              <a href="#嵌套子文档入口">嵌套子文档入口</a>
+            </li>
+                      </ul>
+        </nav>
+              </aside>
+    </div>
+
+      </body>
+</html>

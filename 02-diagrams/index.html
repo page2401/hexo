@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>02. 流程图与时序图 · Hexo 基准文档站</title>
+        <meta name="description" content="标准 GFM 母版派生：测试通过 Hexo before_post_render 过滤器抢先拦截 mermaid 代码块并按需加载本地 mermaid@12.3.0。" />
+        <link rel="stylesheet" href="/hexo/vendor/katex.min.css" />
+    <link rel="stylesheet" href="/hexo/css/style.css" />
+  <meta name="generator" content="Hexo 8.1.2"></head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/hexo/">
+        <span>Hexo 基准文档站</span>
+        <span class="version-pill">v8.1.2 · CJS</span>
+              </a>
+      <div class="topbar-actions">
+        <a href="https://page.2401.xyz/" target="_top">对比总站</a>
+        <a href="https://github.com/page2401/hexo" target="_blank" rel="noopener">GitHub</a>
+        <button
+          class="theme-btn"
+          id="hexo-theme-toggle"
+          type="button"
+          onclick="var r=document.documentElement,d=!(r.getAttribute('data-theme')==='dark'||r.classList.contains('dark'));r.classList.toggle('dark',d);r.setAttribute('data-theme',d?'dark':'light');try{localStorage.setItem('hexo-benchmark-theme',d?'dark':'light')}catch(e){}if(window.__renderHexoMermaid){window.__renderHexoMermaid();}"
+        >
+          <span class="theme-label-dark">深色模式</span>
+          <span class="theme-label-light">浅色模式</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidebar" aria-label="文档章节导航">
+        <div class="nav-group-label">基准章节 (Warehouse Pages)</div>
+        <ul class="nav-list">
+          <li><a class="nav-link" href="/hexo/">00. 概览与版本档案</a></li><li><a class="nav-link" href="/hexo/01-annotations/">01. 专属标注与元数据</a></li><li><a class="nav-link active" href="/hexo/02-diagrams/">02. 流程图与时序图</a></li><li><a class="nav-link" href="/hexo/03-math/">03. 数学公式排版</a></li><li><a class="nav-link" href="/hexo/04-directory/">04. 目录结构与路由取舍</a><div class="nav-subgroup-label">nested · 多级嵌套子页</div><ul class="nav-sublist"><li><a class="nav-link" href="/hexo/04-directory/nested/01-order-and-url/">嵌套子页 A：排序前缀与 URL 纯净度权衡</a></li><li><a class="nav-link" href="/hexo/04-directory/nested/02-sidebar-sync/">嵌套子页 B：多级子目录与侧边栏同步机制</a></li></ul></li><li><a class="nav-link" href="/hexo/05-code-blocks/">05. 高阶代码块与语法高亮</a></li>
+        </ul>
+      </aside>
+
+      <main class="main-content">
+        <article class="doc-article">
+  <h1 id="02-流程图与时序图（前置过滤器拦截-按需本地-Mermaid）">02. 流程图与时序图（前置过滤器拦截 + 按需本地 Mermaid）</h1>
+<p>在 Hexo <code>8.1.2</code> 默认配置下（<code>syntax_highlighter: highlight.js</code>），内置的 <code>backtick_code_block</code> 过滤器会在优先级 <code>10</code>（早于 Markdown 解析器！）将所有三反引号围栏代码块提前编译为 <code>&lt;figure class=&quot;highlight&quot;&gt;</code> 静态高亮表格。因此，本子站在 <code>scripts/markdown-enhancements.js</code> 中以<strong>优先级 <code>5</code></strong> 注册 <code>before_post_render</code> 过滤器，在代码块被高亮吞噬前将 <code>```mermaid</code> 安全封装进 &#96;` 占位通道，并在 `layout.ejs` 中检测到图表时按需引入本地 `/hexo/vendor/mermaid.min.js`（`mermaid@12.3.0`），确保正文三段图表源码相对母版 **100% 零改动**。
+
+## 1. 复杂子图与架构流程图（`flowchart TD`）
+
+测试中文节点标签、子图嵌套（`subgraph`）、虚线边与条件分支：
+
+<hexoPostRenderCodeBlock><div class="hexo-mermaid-wrap"><pre class="mermaid">flowchart TD
+    subgraph MainRepo[&quot;主仓库 page2401.github.io&quot;]
+        Master[&quot;母版 docs&#x2F;*.md (Pure GFM)&quot;]
+        SubPtr[&quot;Git Submodule 指针 (sites&#x2F;*)&quot;]
+        Workbench[&quot;对比工作台源码 (main)&quot;]
+    end
+
+    subgraph SubRepo[&quot;各独立派生子仓库 (sites&#x2F;&lt;id&gt;)&quot;]
+        SrcBranch[&quot;main 分支: 框架配置 + 派生适配版 *.md&quot;]
+        Actions&#123;&quot;GitHub Actions 构建&quot;&#125;
+        PageBranch[&quot;page 孤儿分支: 纯静态产物 + .nojekyll&quot;]
+        SrcBranch --&gt; Actions
+        Actions --&gt;|&quot;自动构建发布&quot;| PageBranch
+    end
+
+    Master -.-&gt;|&quot;按各框架方言派生&quot;| SrcBranch
+    SubPtr -.-&gt;|&quot;跟踪 main 分支&quot;| SrcBranch
+    Workbench --&gt;|&quot;对比母版与各派生版差异&quot;| Portal[&quot;https:&#x2F;&#x2F;page.2401.xyz&#x2F;&quot;]
+    PageBranch --&gt;|&quot;GitHub Organization Pages&quot;| SubSite[&quot;https:&#x2F;&#x2F;page.2401.xyz&#x2F;&lt;id&gt;&#x2F;&quot;]</pre></div></p>
+<h2 id="2-编译管线交互时序图（sequenceDiagram）">2. 编译管线交互时序图（<code>sequenceDiagram</code>）</h2>
+<p>测试多参与者生命线、<code>alt</code> 分支块及激活框（<code>activate</code>&#x2F;<code>deactivate</code>）：</p>
+<div class="hexo-mermaid-wrap"><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor Author as 文档作者
+    participant Master as 主仓母版 docs&#x2F;*.md
+    participant SubGit as 子模块 main 分支
+    participant CI as GitHub Actions (Node 22)
+    participant Pages as GitHub Pages (page 分支)
+
+    Author-&gt;&gt;Master: 编写标准 GFM 基准母版
+    Master-&gt;&gt;SubGit: 派生适配特定 SSG 版本语法
+    SubGit-&gt;&gt;CI: 触发 deploy-page.yml 工作流
+    activate CI
+    alt 编译型 SSG (VitePress &#x2F; VuePress &#x2F; Starlight)
+        CI-&gt;&gt;CI: 预编译静态 HTML + 公式 + 图表挂载点
+    else 运行时引擎 (Docsify v4 &#x2F; v5)
+        CI-&gt;&gt;CI: 组装原始 *.md + _sidebar.md + 锁定版本 vendor
+    end
+    CI-&gt;&gt;Pages: force_orphan 推送至孤儿分支 page
+    deactivate CI
+    Pages--&gt;&gt;Author: 同源子路径 &#x2F;&lt;id&gt;&#x2F; 即刻生效</pre></div>
+
+<h2 id="3-子模块同步状态机（stateDiagram-v2）">3. 子模块同步状态机（<code>stateDiagram-v2</code>）</h2>
+<p>测试状态机语法与状态迁移说明标签：</p>
+<div class="hexo-mermaid-wrap"><pre class="mermaid">stateDiagram-v2
+    [*] --&gt; MasterEdited: 更新主仓母版 docs&#x2F;*.md
+    MasterEdited --&gt; SubmoduleDerived: 同步派生适配至各子模块 *.md
+    SubmoduleDerived --&gt; SubmodulePushed: 子模块 commit &amp; push origin main
+    SubmodulePushed --&gt; PageDeploying: 子仓库 Actions 自动更新 page 分支
+    SubmodulePushed --&gt; MainRepoUpdated: 主仓库更新子模块指针并构建对比数据
+    PageDeploying --&gt; LiveSynced: 线上渲染与母版源码差异视图全部就绪
+    MainRepoUpdated --&gt; LiveSynced: 计算相对母版改动行数完成
+    LiveSynced --&gt; [*]</pre></div>
+
+</article>
+
+      </main>
+
+      <aside class="toc-aside">
+                <div class="toc-title">本页目录</div>
+        <nav aria-label="本页目录">
+          <ul class="toc-list">
+                        <li class="toc-h2">
+              <a href="#2-编译管线交互时序图（sequenceDiagram）">2. 编译管线交互时序图（sequenceDiagram）</a>
+            </li>
+                        <li class="toc-h2">
+              <a href="#3-子模块同步状态机（stateDiagram-v2）">3. 子模块同步状态机（stateDiagram-v2）</a>
+            </li>
+                      </ul>
+        </nav>
+              </aside>
+    </div>
+
+        <script src="/hexo/vendor/mermaid.min.js"></script>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('hexo-benchmark-theme');
+          var root = document.documentElement;
+          if (saved === 'dark' && root.getAttribute('data-theme') !== 'dark') {
+            root.classList.add('dark');
+            root.setAttribute('data-theme', 'dark');
+          }
+        } catch (_) {}
+
+        async function renderAllMermaid() {
+          if (!window.mermaid) return;
+          var wraps = document.querySelectorAll('.hexo-mermaid-wrap');
+          if (!wraps.length) return;
+          var isDark =
+            document.documentElement.getAttribute('data-theme') === 'dark' ||
+            document.documentElement.classList.contains('dark');
+          window.mermaid.initialize({
+            startOnLoad: false,
+            theme: isDark ? 'dark' : 'default',
+            securityLevel: 'loose'
+          });
+          var idx = 0;
+          for (var i = 0; i < wraps.length; i++) {
+            var wrap = wraps[i];
+            if (!wrap.dataset.mermaidSrc) {
+              var pre = wrap.querySelector('pre.mermaid');
+              wrap.dataset.mermaidSrc = pre ? pre.textContent || '' : '';
+            }
+            var src = wrap.dataset.mermaidSrc;
+            if (!src.trim()) continue;
+            try {
+              var id = 'hexo-mermaid-' + Date.now() + '-' + idx++;
+              var out = await window.mermaid.render(id, src);
+              wrap.innerHTML = out.svg;
+            } catch (err) {
+              console.error('Mermaid render failed:', err);
+            }
+          }
+        }
+
+        window.__renderHexoMermaid = renderAllMermaid;
+        void renderAllMermaid();
+
+        var lastDark =
+          document.documentElement.getAttribute('data-theme') === 'dark' ||
+          document.documentElement.classList.contains('dark');
+        new MutationObserver(function () {
+          var nowDark =
+            document.documentElement.getAttribute('data-theme') === 'dark' ||
+            document.documentElement.classList.contains('dark');
+          if (nowDark !== lastDark) {
+            lastDark = nowDark;
+            document.documentElement.classList.toggle('dark', nowDark);
+            void renderAllMermaid();
+          }
+        }).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['data-theme', 'class']
+        });
+      })();
+    </script>
+      </body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>嵌套子页 A：排序前缀与 URL 纯净度权衡 · Hexo 基准文档站</title>
+        <meta name="description" content="Hexo (hexo@8.1.2) 经典 Node.js 静态站点生成器基准实测子站：Tag Plugins、Warehouse 数据模型与零客户端 JS 构建期 KaTeX" />
+        <link rel="stylesheet" href="/hexo/vendor/katex.min.css" />
+    <link rel="stylesheet" href="/hexo/css/style.css" />
+  <meta name="generator" content="Hexo 8.1.2"></head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/hexo/">
+        <span>Hexo 基准文档站</span>
+        <span class="version-pill">v8.1.2 · CJS</span>
+                <span class="zero-js-pill" title="当前页面构建产物含 0 个 script 标签">0 KB Client JS</span>
+              </a>
+      <div class="topbar-actions">
+        <a href="https://page.2401.xyz/" target="_top">对比总站</a>
+        <a href="https://github.com/page2401/hexo" target="_blank" rel="noopener">GitHub</a>
+        <button
+          class="theme-btn"
+          id="hexo-theme-toggle"
+          type="button"
+          onclick="var r=document.documentElement,d=!(r.getAttribute('data-theme')==='dark'||r.classList.contains('dark'));r.classList.toggle('dark',d);r.setAttribute('data-theme',d?'dark':'light');try{localStorage.setItem('hexo-benchmark-theme',d?'dark':'light')}catch(e){}if(window.__renderHexoMermaid){window.__renderHexoMermaid();}"
+        >
+          <span class="theme-label-dark">深色模式</span>
+          <span class="theme-label-light">浅色模式</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidebar" aria-label="文档章节导航">
+        <div class="nav-group-label">基准章节 (Warehouse Pages)</div>
+        <ul class="nav-list">
+          <li><a class="nav-link" href="/hexo/">00. 概览与版本档案</a></li><li><a class="nav-link" href="/hexo/01-annotations/">01. 专属标注与元数据</a></li><li><a class="nav-link" href="/hexo/02-diagrams/">02. 流程图与时序图</a></li><li><a class="nav-link" href="/hexo/03-math/">03. 数学公式排版</a></li><li><a class="nav-link" href="/hexo/04-directory/">04. 目录结构与路由取舍</a><div class="nav-subgroup-label">nested · 多级嵌套子页</div><ul class="nav-sublist"><li><a class="nav-link active" href="/hexo/04-directory/nested/01-order-and-url/">嵌套子页 A：排序前缀与 URL 纯净度权衡</a></li><li><a class="nav-link" href="/hexo/04-directory/nested/02-sidebar-sync/">嵌套子页 B：多级子目录与侧边栏同步机制</a></li></ul></li><li><a class="nav-link" href="/hexo/05-code-blocks/">05. 高阶代码块与语法高亮</a></li>
+        </ul>
+      </aside>
+
+      <main class="main-content">
+        <div class="hexo-meta-banner">
+  <strong>Hexo Nested Page</strong>
+    <span>· source/04-directory/nested/01-order-and-url/index.md</span>
+  </div>
+<article class="doc-article">
+  <h1 id="嵌套子页-A：排序前缀与-URL-纯净度权衡">嵌套子页 A：排序前缀与 URL 纯净度权衡</h1>
+<p>在母版目录 <code>docs/04-directory/nested/</code> 中，文件名使用 <code>01-order-and-url.md</code> 以保证在 Git 与代码编辑器中按阅读先后顺序排列。派生至 Hexo 后，独立页面展开为 <code>01-order-and-url/index.md</code> 以产出干净目录路由 <code>/hexo/04-directory/nested/01-order-and-url/</code>（若希望进一步抹除线上 URL 中的 <code>01-</code> 序号前缀，亦可在单页 Frontmatter 中显式声明 <code>permalink: 04-directory/nested/order-and-url/</code>）。</p>
+<ul>
+<li><a href="/hexo/04-directory/">返回《04. 目录结构与路由取舍》</a></li>
+<li><a href="/hexo/04-directory/nested/02-sidebar-sync/">下一篇：《嵌套子页 B：多级子目录与侧边栏同步机制》</a></li>
+</ul>
+
+</article>
+
+      </main>
+
+      <aside class="toc-aside">
+              </aside>
+    </div>
+
+      </body>
+</html>

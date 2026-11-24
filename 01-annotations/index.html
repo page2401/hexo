@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>01. 专属标注与元数据 · Hexo 基准文档站</title>
+        <meta name="description" content="实测 Hexo 8 的宽松 YAML Frontmatter、经典 Nunjucks 标签插件 ({% note %} / {% folding %}) 与 marked:renderer GFM Alerts。" />
+        <link rel="stylesheet" href="/hexo/vendor/katex.min.css" />
+    <link rel="stylesheet" href="/hexo/css/style.css" />
+  <meta name="generator" content="Hexo 8.1.2"></head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/hexo/">
+        <span>Hexo 基准文档站</span>
+        <span class="version-pill">v8.1.2 · CJS</span>
+                <span class="zero-js-pill" title="当前页面构建产物含 0 个 script 标签">0 KB Client JS</span>
+              </a>
+      <div class="topbar-actions">
+        <a href="https://page.2401.xyz/" target="_top">对比总站</a>
+        <a href="https://github.com/page2401/hexo" target="_blank" rel="noopener">GitHub</a>
+        <button
+          class="theme-btn"
+          id="hexo-theme-toggle"
+          type="button"
+          onclick="var r=document.documentElement,d=!(r.getAttribute('data-theme')==='dark'||r.classList.contains('dark'));r.classList.toggle('dark',d);r.setAttribute('data-theme',d?'dark':'light');try{localStorage.setItem('hexo-benchmark-theme',d?'dark':'light')}catch(e){}if(window.__renderHexoMermaid){window.__renderHexoMermaid();}"
+        >
+          <span class="theme-label-dark">深色模式</span>
+          <span class="theme-label-light">浅色模式</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidebar" aria-label="文档章节导航">
+        <div class="nav-group-label">基准章节 (Warehouse Pages)</div>
+        <ul class="nav-list">
+          <li><a class="nav-link" href="/hexo/">00. 概览与版本档案</a></li><li><a class="nav-link active" href="/hexo/01-annotations/">01. 专属标注与元数据</a></li><li><a class="nav-link" href="/hexo/02-diagrams/">02. 流程图与时序图</a></li><li><a class="nav-link" href="/hexo/03-math/">03. 数学公式排版</a></li><li><a class="nav-link" href="/hexo/04-directory/">04. 目录结构与路由取舍</a><div class="nav-subgroup-label">nested · 多级嵌套子页</div><ul class="nav-sublist"><li><a class="nav-link" href="/hexo/04-directory/nested/01-order-and-url/">嵌套子页 A：排序前缀与 URL 纯净度权衡</a></li><li><a class="nav-link" href="/hexo/04-directory/nested/02-sidebar-sync/">嵌套子页 B：多级子目录与侧边栏同步机制</a></li></ul></li><li><a class="nav-link" href="/hexo/05-code-blocks/">05. 高阶代码块与语法高亮</a></li>
+        </ul>
+      </aside>
+
+      <main class="main-content">
+        <article class="doc-article">
+  <h1 id="01-专属标注与元数据（Hexo-Tag-Plugins-GFM-Alerts）">01. 专属标注与元数据（Hexo Tag Plugins + GFM Alerts）</h1>
+<p>不同静态网站生成器对“提示框 &#x2F; 标注（Callouts &#x2F; Admonitions）”和页面元数据的语法约定存在显著分歧。本文件由标准 GFM 母版派生适配至 <strong>Hexo (<code>hexo@8.1.2</code>)</strong>。</p>
+<h2 id="1-Frontmatter-元数据机制">1. Frontmatter 元数据机制</h2>
+<p>Hexo 使用 <code>hexo-front-matter</code> 解析顶部 YAML（同样支持省略开头 <code>---</code> 的简写格式），对自定义字段完全免 Schema 约束，并自动为每个 <code>Page</code> 注入文件系统时间戳 <code>date</code> 与 <code>updated</code> 存入内置 <code>Warehouse</code> 数据库：</p>
+<ul>
+<li><strong>当前页标题字段</strong>：<code>title: &quot;01. 专属标注与元数据&quot;</code></li>
+<li><strong>页面摘要字段</strong>：<code>description: &quot;...&quot;</code></li>
+<li><strong>自定义导航元数据</strong>：<code>navKey</code>、<code>order</code>、<code>parent</code>（存入 <code>site.pages</code> 供主题 Helper 动态组装多级文档侧边栏；遇到重度花括号页面还可单页声明 <code>disableNunjucks: true</code> 关闭标签解析）</li>
+</ul>
+<h2 id="2-标准提示语义块（Hexo-招牌-Nunjucks-标签插件-）">2. 标准提示语义块（Hexo 招牌 Nunjucks 标签插件 <code>{% note %}</code>）</h2>
+<p>与 VitePress 的三冒号 <code>::: tip</code> 不同，Hexo 自诞生起便确立了以 <code>hexo.extend.tag.register(&#39;note&#39;, fn, &#123; ends: true &#125;)</code> 为核心的 <strong>Tag Plugins（Nunjucks &#x2F; Swig 风格标签插件）</strong> 传统（NexT、Fluid、Butterfly、Volantis 等主流主题均沿用 <code>{% note type 标题 %}...{% endnote %}</code> 方言）：</p>
+<aside class="hexo-note is-info">
+  <div class="hexo-note-title">默认信息提示块</div>
+  <div class="hexo-note-body">
+<p>静态站点对比平台的每个子模块均独立维护 <code>main</code>（源码）与 <code>page</code>（构建产物）双分支，互不污染提交历史。</p>
+  </div>
+</aside>
+
+
+<aside class="hexo-note is-tip">
+  <div class="hexo-note-title">性能优化建议（自定义标题语义）</div>
+  <div class="hexo-note-body">
+<p>在 Hexo 成对标签插件内部调用 <code>hexo.render.renderSync({ text: content, engine: &#39;markdown&#39; })</code>，即可让容器内部无缝支持行内代码、<strong>加粗强调</strong>与构建期数学公式，最终输出纯静态 <code>&lt;aside class=&quot;hexo-note&quot;&gt;</code>，无需任何客户端脚本。</p>
+  </div>
+</aside>
+
+
+<aside class="hexo-note is-warning">
+  <div class="hexo-note-title">Nunjucks 预处理器冲突边界注意</div>
+  <div class="hexo-note-body">
+<p>Hexo 会在 Markdown 渲染管线中执行 Nunjucks 标签求值。若要在正文段落中展示字面量 <code>{% note %}</code> 或双花括号 <code>{{ variable }}</code>，必须包裹在内置的 <code>{% raw %}...{% endraw %}</code> 标签中（或在三反引号代码块中由内置 <code>backtick_code_block</code> 自动转义花括号），否则会触发 <code>Template render error</code>！</p>
+  </div>
+</aside>
+
+
+<aside class="hexo-note is-danger">
+  <div class="hexo-note-title">不可逆分支覆盖警告</div>
+  <div class="hexo-note-body">
+<p>自动化流水线在向 <code>page</code> 分支推送构建产物时会启用 <code>force_orphan: true</code>，切勿在 <code>page</code> 分支直接手工修改代码！</p>
+  </div>
+</aside>
+
+
+<h2 id="3-可折叠详情容器（-标签插件与原生-）">3. 可折叠详情容器（<code>{% folding %}</code> 标签插件与原生 <code>&lt;details&gt;</code>）</h2>
+<p>Hexo 生态主题广泛提供 <code>{% folding 标题 %}...{% endfolding %}</code> 标签插件以规避手写 HTML 闭合标签，同时 <code>hexo-renderer-marked</code>（关闭 <code>dompurify</code> 时）亦完整兼容标准 CommonMark 原生 <code>&lt;details&gt;</code>：</p>
+<details class="hexo-folding">
+  <summary>点击展开查看 Hexo 标签插件折叠容器示例</summary>
+  <div class="hexo-folding-body">
+<p>通过 <code>hexo.extend.tag.register(&#39;folding&#39;, ..., { ends: true })</code> 注册的折叠插件，内部可直接混排列表与公式 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>e</mi><mrow><mi>i</mi><mi>π</mi></mrow></msup><mo>+</mo><mn>1</mn><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">e^&#123;i\pi&#125; + 1 = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.908em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">iπ</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>。</p>
+  </div>
+</details>
+
+
+<details>
+<summary>点击展开查看母版原生 &lt;details&gt; 折叠容器源码结构</summary>
+
+
+<figure class="highlight markdown"><table><tr><td class="code"><pre><code class="hljs markdown">&#123;% note tip 性能优化建议 %&#125;<br>Hexo 标签插件与纯正 GFM 语法并存对比。<br>&#123;% endnote %&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p>除了代码块，折叠容器内同样支持列表、表格与数学公式 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">f(x) = x^2 + 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8974em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>。</p>
+</details>
+
+<h2 id="4-GitHub-风格引用警报（GFM-Alerts）跨框架直通测试">4. GitHub 风格引用警报（GFM Alerts）跨框架直通测试</h2>
+<p>以下三段<strong>保持母版原文一字不改</strong>！值得注意的实测结论是：官方默认渲染器 <code>hexo-renderer-marked@7.0.1</code> <strong>开箱并未内置 GFM Alert 解析器</strong>（且社区 <code>marked-alert@2</code> 为纯 ESM 包，无法在 Hexo CJS <code>scripts/</code> 中直接 <code>require</code>）；本子站在 <code>scripts/markdown-enhancements.js</code> 中利用官方 <code>marked:renderer</code> 钩子扩展了 20 行 <code>blockquote</code> 规则，实现了全部 5 类警报零改造直通：</p>
+<div class="markdown-alert markdown-alert-note">
+  <p class="markdown-alert-title">NOTE · 提示</p>
+  <p>这是一段标准的 GitHub Flavored Markdown <code>[!NOTE]</code> 警报文本，用于检验各生成器对母版语法的零改造直通能力。</p>
+</div>
+<div class="markdown-alert markdown-alert-important">
+  <p class="markdown-alert-title">IMPORTANT · 重要</p>
+  <p>跨平台迁移 Markdown 文档时，是否原生兼容 <code>&gt; [!IMPORTANT]</code> 与 <code>&gt; [!WARNING]</code> 直接决定了母版文档的派生改造成本。</p>
+</div>
+<div class="markdown-alert markdown-alert-caution">
+  <p class="markdown-alert-title">CAUTION · 危险警告</p>
+  <p>若目标生成器未内置 GFM Alert 解析器（如 VuePress v1、Starlight 默认配置、Docsify v4 旧插件），上方标记会退化为普通引用块并原样露出 <code>[!CAUTION]</code> 字符串。</p>
+</div>
+
+</article>
+
+      </main>
+
+      <aside class="toc-aside">
+                <div class="toc-title">本页目录</div>
+        <nav aria-label="本页目录">
+          <ul class="toc-list">
+                        <li class="toc-h2">
+              <a href="#1-Frontmatter-元数据机制">1. Frontmatter 元数据机制</a>
+            </li>
+                        <li class="toc-h2">
+              <a href="#2-标准提示语义块（Hexo-招牌-Nunjucks-标签插件-）">2. 标准提示语义块（Hexo 招牌 Nunjucks 标签插件 {% note %}）</a>
+            </li>
+                        <li class="toc-h2">
+              <a href="#3-可折叠详情容器（-标签插件与原生-）">3. 可折叠详情容器（{% folding %} 标签插件与原生 &amp;lt;details&amp;gt;）</a>
+            </li>
+                        <li class="toc-h2">
+              <a href="#4-GitHub-风格引用警报（GFM-Alerts）跨框架直通测试">4. GitHub 风格引用警报（GFM Alerts）跨框架直通测试</a>
+            </li>
+                      </ul>
+        </nav>
+              </aside>
+    </div>
+
+      </body>
+</html>
