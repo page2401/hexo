@@ -28,6 +28,10 @@ order: 0
     <h3><a href="./04-directory/index.md">04. 目录结构与路由取舍 →</a></h3>
     <p>剖析博客基因下 <code>_posts/</code> 与独立 <code>Page</code> 双轨路由差异及 <code>&lt;slug&gt;/index.md</code> 干净 URL 约定。</p>
   </div>
+  <div class="hero-card">
+    <h3><a href="./05-code-blocks/index.md">05. 高阶代码块与语法高亮 →</a></h3>
+    <p>实测 Hexo 内置 <code>{% raw %}{% codeblock %}{% endraw %}</code> 标签插件（标题栏、<code>lang:ts</code>、<code>mark:3,7-9</code>）与服务端 <code>highlight.js</code>。</p>
+  </div>
 </div>
 
 ## 精确锁定版本档案（`package.json`）
@@ -42,7 +46,7 @@ Hexo 8 延续了经典的 Node.js CommonJS 插件生态与 `scripts/*.js` 自动
 | `katex` | `0.19.1` | 构建期在 `marked:extensions` 中服务端渲染公式 HTML + MathML，由 `Generator` 输出本地 CSS 与字体至 `/hexo/vendor/` |
 | `mermaid` | `12.3.0` | 仅当页面产物包含 `.mermaid` 图表容器时按需加载本地 `/hexo/vendor/mermaid.min.js` |
 
-## 五大标准基准章节对照
+## 六大标准基准章节对照
 
 | 章节路径 | 测试维度 | 相对母版 `docs/*.md` 的核心派生改造点 |
 | :--- | :--- | :--- |
@@ -50,3 +54,4 @@ Hexo 8 延续了经典的 Node.js CommonJS 插件生态与 `scripts/*.js` 自动
 | [`02-diagrams/index.md`](./02-diagrams/index.md) | 流程图与时序图 | 正文三段 Mermaid 代码块一字不改；靠优先级 `5` 的 `before_post_render` 抢在内置 `highlight.js` 前接管围栏块 |
 | [`03-math/index.md`](./03-math/index.md) | 数学公式排版 | 正文公式与 `\$` 转义测试一字不改；通过 `marked:extensions` 构建期直出 KaTeX HTML 并转义 `<annotation>` 花括号防 Nunjucks 报错 |
 | [`04-directory/`](./04-directory/index.md) | 目录结构与路由取舍 | 因全局 `permalink` 仅对 `_posts/` 生效，独立文档页遵循 `hexo new page` 展开为 `<slug>/index.md`，由 `Warehouse` 查询动态构建多级侧栏 |
+| [`05-code-blocks/index.md`](./05-code-blocks/index.md) | 高阶代码块与语法高亮 | 启用内置 `{% raw %}{% codeblock scripts/resolve-route.ts lang:ts mark:3,7-9 %}{% endraw %}` 标签插件实现 `<figcaption>` 标题栏与 `<mark>` 行高亮 |

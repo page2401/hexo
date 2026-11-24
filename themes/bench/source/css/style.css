@@ -327,13 +327,26 @@ pre code {
   padding: 0;
 }
 
-/* Hexo figure.highlight wrapper reset + highlight.js token theme */
+/* Hexo figure.highlight wrapper reset + {% codeblock %} figcaption / gutter / mark + highlight.js token theme */
 figure.highlight {
   margin: 1rem 0;
   background: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow-x: auto;
+}
+
+figure.highlight figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.42rem 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--fg-muted);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
 }
 
 figure.highlight table {
@@ -346,6 +359,19 @@ figure.highlight table {
 figure.highlight td {
   border: none;
   padding: 0;
+  vertical-align: top;
+}
+
+figure.highlight td.gutter {
+  width: 1%;
+  user-select: none;
+  text-align: right;
+  color: var(--fg-muted);
+  border-right: 1px solid var(--border);
+}
+
+figure.highlight td.gutter pre {
+  padding: 0.95rem 0.65rem;
 }
 
 figure.highlight pre {
@@ -356,6 +382,14 @@ figure.highlight pre {
   padding: 0.95rem 1.1rem;
 }
 
+figure.highlight mark {
+  display: inline-block;
+  width: 100%;
+  color: inherit;
+  background: var(--warning-bg);
+  border-radius: 2px;
+}
+
 .hljs-comment,
 .hljs-quote,
 .hljs-meta {
@@ -364,16 +398,24 @@ figure.highlight pre {
 
 .hljs-keyword,
 .hljs-selector-tag,
-.hljs-literal,
-.hljs-deletion {
+.hljs-literal {
   color: var(--tok-keyword);
+}
+
+.hljs-deletion {
+  color: var(--caution-fg);
+  background: var(--caution-bg);
 }
 
 .hljs-string,
 .hljs-doctag,
-.hljs-regexp,
-.hljs-addition {
+.hljs-regexp {
   color: var(--tok-string);
+}
+
+.hljs-addition {
+  color: var(--tip-fg);
+  background: var(--tip-bg);
 }
 
 .hljs-title,
